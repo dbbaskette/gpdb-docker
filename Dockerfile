@@ -1,6 +1,7 @@
 #
 #  Dockerfile for a GPDB SNE Sandbox
 #
+# AutoBuild setup on 2/16/16
 
 FROM centos:6.7
 MAINTAINER dbaskette@pivotal.io
