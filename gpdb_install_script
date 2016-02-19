@@ -1,6 +1,0 @@
-/tmp/greenplum-db-4.3.7.1-build-1-RHEL5-x86_64.bin << EOF
-yes
-
-yes
-yes
-EOF
