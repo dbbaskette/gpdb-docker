@@ -3,7 +3,7 @@ Greenplum Database Docker image
 
 # Building the Image
 cd <docker working directory>
-docker build -t [image_tag] .
+docker build -t [tag] .
 
 # Running the Image
-docker run -i -p 5432:5432 [image_tag]
+docker run -i -p 5432:5432 [tag]
