@@ -1,10 +1,10 @@
 # gpdb-docker
 Greenplum Database Docker image
 
-# Building the Image
+# Building the Docker Image
 cd [docker working directory]
 
 docker build -t [tag] .
 
-# Running the Image
+# Running the Docker Image
 docker run -i -p 5432:5432 [tag]
