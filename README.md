@@ -16,8 +16,6 @@ root/pivotal
 
 gpadmin/pivotal
 
-gpmon/pivotal
-
 # Using psql in the Container
 su - gpadmin
 
