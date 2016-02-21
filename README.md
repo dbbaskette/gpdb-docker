@@ -8,6 +8,13 @@ cd [docker working directory]
 
 docker build -t [tag] .
 
+# Container Accounts
+root/pivotal
+
+gpadmin/pivotal
+
+gpmon/pivotal
+
 # Running the Docker Image
 docker run -i -p 5432:5432 [tag]
 
