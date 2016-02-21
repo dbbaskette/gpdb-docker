@@ -1,5 +1,5 @@
 # gpdb-docker
-Pivotal Greenplum Database Base Docker Image
+Pivotal Greenplum Database Base Docker Image (4.3.7.1)
 
 # Building the Docker Image
 cd [docker working directory]
