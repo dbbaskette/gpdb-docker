@@ -1,46 +1,36 @@
 #
-#  Dockerfile for a GPDB SNE Sandbox Base Image
+#  Dockerfile for a GPDB SNE Sandbox GPCC Image
 #
 
-FROM centos:6.7
-MAINTAINER dbaskette@pivotal.io
+FROM pivotaldata/gpdb-base
+MAINTAINER dcomingore@pivotal.io
 
+#Load Files
 COPY * /tmp/
-RUN echo root:pivotal | chpasswd \
-        && yum install -y unzip which tar more util-linux-ng passwd openssh-clients openssh-server ed m4; yum clean all \
-        && unzip /tmp/greenplum-db-4.3.7.1-build-1-RHEL5-x86_64.zip -d /tmp/ \
-        && rm /tmp/greenplum-db-4.3.7.1-build-1-RHEL5-x86_64.zip \
-        && sed -i s/"more << EOF"/"cat << EOF"/g /tmp/greenplum-db-4.3.7.1-build-1-RHEL5-x86_64.bin \
-        && echo -e "yes\n\nyes\nyes\n" | /tmp/greenplum-db-4.3.7.1-build-1-RHEL5-x86_64.bin \
-        && cat /tmp/sysctl.conf.add >> /etc/sysctl.conf \
-        && cat /tmp/limits.conf.add >> /etc/security/limits.conf \
-        && rm -f /tmp/*.add \
-        && echo "localhost" > /tmp/gpdb-hosts \
-        && chmod 777 /tmp/gpinitsystem_singlenode \
-        && hostname > ~/orig_hostname \
-        && mv /tmp/run.sh /usr/local/bin/run.sh \
-        && chmod +x /usr/local/bin/run.sh \
-        && /usr/sbin/groupadd gpadmin \
-        && /usr/sbin/useradd gpadmin -g gpadmin -G wheel \
-        && echo "pivotal"|passwd --stdin gpadmin \
-        && echo "gpadmin        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers \
-        && mv /tmp/bash_profile /home/gpadmin/.bash_profile \
-        && chown -R gpadmin: /home/gpadmin \
-        && mkdir -p /gpdata/master /gpdata/segments \
-        && chown -R gpadmin: /gpdata \
-        && chown -R gpadmin: /usr/local/green* \
+
+#GPCC Prereqs
+RUN echo -e "yes\n" | yum install vixie-cron
+
+#GPCC Core Install
+RUN unzip /tmp/greenplum-cc-web-2.0.0-build-32-RHEL5-x86_64.zip -d /tmp/ \
+        && rm /tmp/greenplum-cc-web-2.0.0-build-32-RHEL5-x86_64.zip \
+        && echo -e "yes\n\nyes\nyes\n" | /tmp/greenplum-cc-web-2.0.0-build-32-RHEL5-x86_64.bin
+
+# GPCC Post-Core Install
+RUN su gpadmin -l -c "source /usr/local/greenplum-cc-web/gpcc_path.sh" \
+        && su gpadmin -l -c "source /usr/local/greenplum-db/greenplum_path.sh" \
         && service sshd start \
-        && su gpadmin -l -c "source /usr/local/greenplum-db/greenplum_path.sh;gpssh-exkeys -f /tmp/gpdb-hosts"  \
-        && su gpadmin -l -c "source /usr/local/greenplum-db/greenplum_path.sh;gpinitsystem -a -c  /tmp/gpinitsystem_singlenode -h /tmp/gpdb-hosts; exit 0 "\
-        && su gpadmin -l -c "export MASTER_DATA_DIRECTORY=/gpdata/master/gpseg-1;source /usr/local/greenplum-db/greenplum_path.sh;psql -d template1 -c \"alter user gpadmin password 'pivotal'\"; createdb gpadmin;  exit 0"
+        && su gpadmin -l -c "/usr/local/greenplum-db/bin/gpstart -a" \
+        && su gpadmin -l -c "psql -d gpadmin -c '''create database gpperfmon;'''" \
+        && su gpadmin -l -c "echo -e 'pivotal\npivotal\n' | createuser -s -l -P gpmon" \
 
-EXPOSE 5432 22
-
+#Set up environmentals
+EXPOSE 5432 22 28080
 VOLUME /gpdata
-# Set the default command to run when starting the container
 
+# Set the default command to run when starting the container
 CMD echo "127.0.0.1 $(cat ~/orig_hostname)" >> /etc/hosts \
         && service sshd start \
-#       && sysctl -p \
         && su gpadmin -l -c "/usr/local/bin/run.sh" \
+        && su gpadmin -l -c "echo export GPPERFMONHOME=/usr/local/greenplum-cc-web-2.0.0-build-32 >> ~/.bashrc;source ~/.bashrc;psql -d gpadmin -c '''create database gpperfmon;''';echo -e 'pivotal\npivotal\n' | createuser -s -l -P gpmon;echo -e 'host all gpmon samenet trust' >> /gpdata/master/gpseg-1/pg_hba.conf;source /usr/local/greenplum-db/greenplum_path.sh;gpstop -u;/usr/local/greenplum-cc-web-2.0.0-build-32/bin/gpcmdr --setup --config_file /tmp/gpcmdr.conf;/usr/local/greenplum-cc-web-2.0.0-build-32/bin/gpcmdr --start gpdb_docker" \
         && /bin/bash
