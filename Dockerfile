@@ -12,7 +12,7 @@ RUN echo root:pivotal | chpasswd \
         && rm /tmp/greenplum-db-4.3.7.1-build-1-RHEL5-x86_64.zip \
         && sed -i s/"more << EOF"/"cat << EOF"/g /tmp/greenplum-db-4.3.7.1-build-1-RHEL5-x86_64.bin \
         && echo -e "yes\n\nyes\nyes\n" | /tmp/greenplum-db-4.3.7.1-build-1-RHEL5-x86_64.bin \
-        && rm /tmp/greenplum-db-4.3.7.1-build-1-RHEL5-x86_64.bin &&
+        && rm /tmp/greenplum-db-4.3.7.1-build-1-RHEL5-x86_64.bin \
         && cat /tmp/sysctl.conf.add >> /etc/sysctl.conf \
         && cat /tmp/limits.conf.add >> /etc/security/limits.conf \
         && rm -f /tmp/*.add \
