@@ -1,6 +1,9 @@
 # gpdb-docker
 Pivotal Greenplum Database Base Docker Image (4.3.7.1)
 
+[![](https://images.microbadger.com/badges/version/pivotaldata/gpdb-base.svg)](https://microbadger.com/images/pivotaldata/gpdb-base "Get your own version badge on microbadger.com")
+
+
 # Building the Docker Image
 You will first need to download the Pivotal Greenplum Database 4.3.7.1 installer (.zip) located at https://network.pivotal.io/products/pivotal-gpdb and place it inside the docker working directory.
 
